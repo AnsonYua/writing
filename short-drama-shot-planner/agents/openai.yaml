@@ -1,0 +1,4 @@
+interface:
+  display_name: "Short Drama Shot Planner"
+  short_description: "Plan structural shot skeletons from one scene card."
+  default_prompt: "Use $short-drama-shot-planner to turn this scene card into structural shot skeleton JSON only."

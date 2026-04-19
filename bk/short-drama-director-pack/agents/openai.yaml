@@ -1,0 +1,4 @@
+interface:
+  display_name: "Short Drama Director Pack"
+  short_description: "Assemble a final director-ready short-drama pack."
+  default_prompt: "Use $short-drama-director-pack to assemble a final director-ready pack from the script assets."

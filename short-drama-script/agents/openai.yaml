@@ -1,0 +1,7 @@
+interface:
+  display_name: "Short Drama Script"
+  short_description: "Write polished viral short-drama scripts from a topic."
+  default_prompt: "Use $short-drama-script to turn this topic into a polished viral short-drama script."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Short Drama Second Review"
+  short_description: "Second-pass viral review for short-drama scripts."
+  default_prompt: "Use $short-drama-second-review to stress-test this short-drama script for viral potential."

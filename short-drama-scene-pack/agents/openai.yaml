@@ -1,0 +1,4 @@
+interface:
+  display_name: "Short Drama Scene Pack"
+  short_description: "Turn a short-drama script into a shootable scene pack."
+  default_prompt: "Use $short-drama-scene-pack to turn this short-drama script into a shootable scene pack."

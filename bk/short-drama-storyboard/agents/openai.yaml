@@ -1,0 +1,4 @@
+interface:
+  display_name: "Short Drama Storyboard"
+  short_description: "Turn scene packs into shot-by-shot storyboard plans."
+  default_prompt: "Use $short-drama-storyboard to turn this scene pack into a shot-by-shot storyboard plan."

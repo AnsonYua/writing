@@ -1,0 +1,4 @@
+interface:
+  display_name: "Short Drama Character Pack"
+  short_description: "Extract stable character packs from short-drama scripts."
+  default_prompt: "Use $short-drama-character-pack to extract a reusable character pack from this short-drama script."
