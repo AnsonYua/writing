@@ -1,4 +1,4 @@
 interface:
-  display_name: "Short Drama Shot Prompt"
-  short_description: "Write one image prompt and one short caption for one approved shot."
-  default_prompt: "Use $short-drama-shot-prompt to turn this one approved shot JSON into one clean still-image prompt plus one short caption line, while trusting anchors and writing from image space, not story-summary space."
+  display_name: "短劇 Shot Prompt"
+  short_description: "讀取 shot array JSON，為每一格寫圖片起始幀 prompt 與影片 prompt。"
+  default_prompt: "使用 $short-drama-shot-prompt，讀取我提供的 shot array JSON 檔案或檔案路徑。將輸入檔內的 shot array 逐格轉成 start_image_prompt 與 video_prompt，caption 如存在必須原樣保留。除非我另外指定輸出路徑，否則把結果輸出到輸入檔同資料夾的 output_prompt.json。不要硬編任何專案名稱、故事標題或絕對路徑；不要改 shot 數量、順序或故事線。"
