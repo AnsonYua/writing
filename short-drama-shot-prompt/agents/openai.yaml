@@ -1,4 +1,4 @@
 interface:
   display_name: "短劇 Shot Prompt"
   short_description: "讀取 shot array JSON，為每一格寫圖片起始幀 prompt 與影片 prompt。"
-  default_prompt: "使用 $short-drama-shot-prompt，讀取我提供的 shot array JSON 檔案或檔案路徑。將輸入檔內的 shot array 逐格轉成 start_image_prompt 與 video_prompt，caption 如存在必須原樣保留。除非我另外指定輸出路徑，否則把結果輸出到輸入檔同資料夾的 output_prompt.json。不要硬編任何專案名稱、故事標題或絕對路徑；不要改 shot 數量、順序或故事線。"
+  default_prompt: "使用 $short-drama-shot-prompt，讀取我提供的 shot array JSON 檔案或檔案路徑。先讀完整份 shot array，理解整體故事遞進，再為每格推斷 storyboard_function；不要逐字翻譯 shot_description、audience_read 或 motion_note。每格優先用 1 scene + 1 character 或 1 scene + 2 characters 的簡單構圖，只在故事功能需要時加入一個主道具 / proof。start_image_prompt 必須是影片第一幀的停格狀態，定格可見關係，不要提前完成應在 video_prompt 發生的動作。刪掉不可畫或不重要資訊，例如毫無防備、快沒電、坐近插座、像一件平常小事、氣氛一下冷下來；要轉成可見姿勢、視線、手部位置、道具狀態或直接省略。caption 如存在必須原樣保留。除非我另外指定輸出路徑，否則把結果輸出到輸入檔同資料夾的 output_prompt.json。不要硬編任何專案名稱、故事標題或絕對路徑；不要改 shot 數量、順序或故事線。"

@@ -1,0 +1,318 @@
+{
+  "anchor_material_pack.json": {
+    "character_anchors": [
+      {
+        "anchor_id": "character_ref_zhou_xiaoqing",
+        "name": "周曉晴",
+        "priority": "primary",
+        "anchor_prompt": "生成周曉晴的角色 reference image：17歲中國高中女生，偏瘦學生輪廓，乾淨自然臉，年齡感明確，眼神敏感警覺，姿態偏收。服裝可用校服或普通家居服，不成人化、不時尚化、不性感化。",
+        "negative_prompt_note": "避免成人化、大學生感、濃妝、捲髮、成熟穿搭、glamour 造型；不要把她畫成外放強悍的反擊型。"
+      },
+      {
+        "anchor_id": "character_ref_li_meizhen",
+        "name": "李美珍",
+        "priority": "primary",
+        "anchor_prompt": "生成李美珍的角色 reference image：45歲左右中國中年母親，普通勞累家居女性，簡單髮型，素面，眉眼疲憊，氣質克制壓抑。服裝是樸素家居服或簡單上衣褲子。",
+        "negative_prompt_note": "避免惡母臉、精緻強勢、glamour 母親、戲劇化高壓表情；不要畫成完全無懼的反擊型。"
+      },
+      {
+        "anchor_id": "character_ref_chen_guoqiang",
+        "name": "陳國強",
+        "priority": "primary",
+        "anchor_prompt": "生成陳國強的角色 reference image：43歲左右中國中年男人，普通叔輩外觀，家中日常便服，自然正常表情，像熟人長輩，站姿有主場感。",
+        "negative_prompt_note": "避免猥瑣化、陰森化、卡通反派化、過度 creepy facial design；不要畫成一眼就是壞人的反派。"
+      }
+    ],
+    "scene_anchors": [
+      {
+        "anchor_id": "scene_anchor_living_room",
+        "scene_name": "晚飯後客廳餐桌",
+        "used_by_scene_ids": ["SC1"],
+        "anchor_prompt": "生成普通家庭晚飯後客廳 reference image：客廳餐桌、簡單家具、暖色室內光、真實家庭生活感。畫面乾淨，不要豪宅感，不要酒店感。",
+        "continuity_notes": "客廳餐桌、暖色室內光和普通家庭生活感是 SC1 的主要空間錨點。"
+      },
+      {
+        "anchor_id": "scene_anchor_bedroom",
+        "scene_name": "李美珍臥室與房門",
+        "used_by_scene_ids": ["SC2"],
+        "anchor_prompt": "生成普通家庭臥室 reference image：狹窄房間、關上的房門、暖色低光、簡單床邊或牆面。房門要清楚可見，空間有壓迫感。",
+        "continuity_notes": "臥室房門是 SC2 後半段的壓力中心，房門位置和狹窄空間感需要固定。"
+      }
+    ]
+  },
+  "output_linked_prompt.json": {
+    "anchor_material_pack_path": "../anchor_material_pack.json",
+    "shots": [
+      {
+        "scene_id": "SC1",
+        "scene_number": 1,
+        "shot_id": "SC1_SH1",
+        "shot_number": 1,
+        "start_image_prompt": "以圖1作為場景參考，保留客廳餐桌、暖色室內光和普通家庭生活感；保留圖2中的中年男人陳國強的臉、髮型和圖中服裝；保留圖3中的女孩周曉晴的臉、髮型和圖中服裝。改成中近景第一幀：圖2中的中年男人站在畫面左側桌旁，手掌托著黑色手機遞到畫面中央。圖3中的女孩坐在畫面右側餐桌旁，右手伸向手機但尚未握實，視線落在手機交接位置。桌面碗筷只作模糊背景。",
+        "negative_prompt_note": "避免手機已經完全落到女孩手裡；避免女孩看向手機螢幕；避免多餘手指、多餘手臂、畸形手、錯誤握持、文字水印。",
+        "video_prompt": "鏡頭保持平穩。畫面左側的中年男人把黑色手機交到畫面右側的女孩手上。女孩接住後仍看向手機交接位置，不看螢幕。最後停在手機剛落到女孩手裡。",
+        "caption": "食完飯，舅父順手將部手機遞畀我，叫我幫手拎去充電。我嗰陣真係只當係一件小事。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_living_room",
+            "job": "保留客廳餐桌、暖色室內光和普通家庭生活感"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_chen_guoqiang",
+            "job": "保留中年男人的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "手機交接是本格核心，第一幀不可提前變成已接住。"
+      },
+      {
+        "scene_id": "SC1",
+        "scene_number": 1,
+        "shot_id": "SC1_SH2",
+        "shot_number": 2,
+        "start_image_prompt": "以圖1作為場景參考，保留客廳一角和暖色室內光；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝。改成中近景第一幀：圖2中的女孩站在畫面中央，雙手低低握著亮起的黑色手機，低頭看著螢幕。手機螢幕顯示一張家中洗手間門口角度的可疑照片。",
+        "negative_prompt_note": "避免出現充電線；避免女孩抬頭；避免手機螢幕黑屏；避免多餘手指、畸形手、錯誤握持、臉部變形、文字水印。",
+        "video_prompt": "鏡頭緩慢推近亮起的手機螢幕。畫面中央的女孩低頭不動，不抬頭。最後停在女孩側臉和手機螢幕同框。",
+        "caption": "我一低頭想插線，就見到螢幕停咗喺一張相度。嗰個角度一睇就唔應該出現喺我屋企。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_living_room",
+            "job": "保留客廳一角和暖色室內光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "充電線不是本格核心，刪除可減少手部錯誤。"
+      },
+      {
+        "scene_id": "SC1",
+        "scene_number": 1,
+        "shot_id": "SC1_SH3",
+        "shot_number": 3,
+        "start_image_prompt": "以圖1作為場景參考，保留客廳邊緣和暖色室內光；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝。改成中近景第一幀：圖2中的女孩站在畫面中央，雙手握著亮起的黑色手機，低頭看著相簿頁面。手機螢幕上有多張家中角落的可疑照片縮圖。",
+        "negative_prompt_note": "避免螢幕只顯示單張照片；避免女孩抬頭；避免多餘手指、畸形手、錯誤握持、臉部變形、文字水印。",
+        "video_prompt": "鏡頭貼近手機和女孩的手。女孩用手指短短往下滑，相簿縮圖快速移動。最後停在女孩低頭看著手機、身體停住的畫面。",
+        "caption": "等舅父一走開，我就即刻打開相簿再滑落去。越睇我越知，入面唔止一張，仲有幾張直頭係偷拍我。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_living_room",
+            "job": "保留客廳邊緣和暖色室內光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "本格核心是相簿縮圖與女孩停住，不需要加入其他小道具。"
+      },
+      {
+        "scene_id": "SC1",
+        "scene_number": 1,
+        "shot_id": "SC1_SH4",
+        "shot_number": 4,
+        "start_image_prompt": "以圖1作為場景參考，保留客廳空間、暖色室內光和房間入口；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝；保留圖3中的中年女性李美珍的臉、髮型和圖中服裝。改成中景第一幀：圖2中的女孩站在畫面左側，手已扣住圖3中的中年女性手臂。兩人身體都轉向房間入口，女孩另一隻手握著黑色手機。",
+        "negative_prompt_note": "避免兩人已經走進房間；避免手機變成畫面中心；避免多餘手指、多餘手臂、畸形手、臉部變形、文字水印。",
+        "video_prompt": "鏡頭跟著兩人移動。畫面左側的女孩拉著畫面右側的中年女性往房間入口走。最後停在兩人靠近房間入口。",
+        "caption": "我嗰下第一個反應就係搵我媽。我連客廳都唔想再企，直接拉住佢入房。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_living_room",
+            "job": "保留客廳空間、暖色室內光和房間入口"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "房間入口要在首幀建立，讓影片跟拍有明確方向。"
+      },
+      {
+        "scene_id": "SC2",
+        "scene_number": 2,
+        "shot_id": "SC2_SH1",
+        "shot_number": 1,
+        "start_image_prompt": "以圖1作為場景參考，保留臥室房門、狹窄空間和暖色低光；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝；保留圖3中的中年女性李美珍的臉、髮型和圖中服裝。改成近距離雙人第一幀：圖2中的女孩站在畫面左側，雙手把黑色手機推到畫面中央。圖3中的中年女性站在畫面右側，手剛抬起準備接住。關上的房門在背景。",
+        "negative_prompt_note": "避免中年女性已經完全拿住手機；避免房門消失；避免多餘手指、多餘手臂、畸形手、錯誤握持、文字水印。",
+        "video_prompt": "鏡頭貼住兩人的手和黑色手機。畫面左側的女孩把手機推進畫面右側的中年女性手裡。最後停在中年女性剛接住手機。",
+        "caption": "門一閂，我就即刻將部手機塞畀我媽。我只係想佢快啲自己睇一次。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_bedroom",
+            "job": "保留臥室房門、狹窄空間和暖色低光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "手機交接是核心，手部距離要清楚。"
+      },
+      {
+        "scene_id": "SC2",
+        "scene_number": 2,
+        "shot_id": "SC2_SH2",
+        "shot_number": 2,
+        "start_image_prompt": "以圖1作為場景參考，保留臥室狹窄空間和暖色低光；保留圖2中的中年女性李美珍的臉、髮型和圖中服裝；保留圖3中的女孩周曉晴的臉、髮型和圖中服裝。改成雙人中近景第一幀：圖2中的中年女性站在畫面右側，低頭看著手中的亮屏黑色手機。圖3中的女孩站在畫面左側，盯著中年女性的臉。",
+        "negative_prompt_note": "避免女孩看向鏡頭；避免中年女性抬頭；避免手機螢幕黑屏；避免多餘手指、畸形手、錯誤握持、臉部變形、文字水印。",
+        "video_prompt": "鏡頭在中年女性的臉和手機之間輕輕移動。畫面右側的中年女性手指微微發抖，仍低頭看手機。畫面左側的女孩一直看著她。最後停在兩人都不說話的中近景。",
+        "caption": "我一路望住我媽個樣，等佢睇完開口。佢越睇越白，連隻手都開始震。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_bedroom",
+            "job": "保留臥室狹窄空間和暖色低光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "影片只保留手抖和低頭看手機，不加入太多剪接。"
+      },
+      {
+        "scene_id": "SC2",
+        "scene_number": 2,
+        "shot_id": "SC2_SH3",
+        "shot_number": 3,
+        "start_image_prompt": "以圖1作為場景參考，保留臥室房門、狹窄空間和暖色低光；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝；保留圖3中的中年女性李美珍的臉、髮型和圖中服裝。改成近距離雙人第一幀：圖2中的女孩站在畫面左側，盯著畫面右側的中年女性。圖3中的中年女性握著黑色手機，視線先看向背景中關上的房門。",
+        "negative_prompt_note": "避免中年女性正面看女孩；避免房門打開；避免手機搶走第一眼中心；避免多餘手指、畸形手、臉部變形、文字水印。",
+        "video_prompt": "鏡頭保持近距離。畫面左側的女孩看著中年女性，畫面右側的中年女性避開她的視線，轉頭看向背景的房門。最後停在女孩看著她、她看著房門。",
+        "caption": "我一直望住我媽，等佢講句會幫我。點知佢第一句，係叫我唔好講出去。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_bedroom",
+            "job": "保留臥室房門、狹窄空間和暖色低光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "求助落空要轉成可見畫面：中年女性避開女孩視線。"
+      },
+      {
+        "scene_id": "SC2",
+        "scene_number": 2,
+        "shot_id": "SC2_SH4",
+        "shot_number": 4,
+        "start_image_prompt": "以圖1作為場景參考，保留臥室狹窄空間和暖色低光；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝；保留圖3中的中年女性李美珍的臉、髮型和圖中服裝。改成雙人中近景第一幀：圖2中的女孩站在畫面左側，身體微微前傾。圖3中的中年女性站在畫面右側，握著黑色手機，收住身體，不正面看女孩。",
+        "negative_prompt_note": "避免兩人距離太遠；避免中年女性正面對視；避免誇張爭吵動作；避免多餘手指、多餘手臂、畸形手、臉部變形、文字水印。",
+        "video_prompt": "鏡頭保持中近景。畫面左側的女孩低聲追問，身體微微前傾。畫面右側的中年女性握著黑色手機，收住身體，不正面看女孩。最後停在兩人站得很近的畫面。",
+        "caption": "我直頭唔明，佢明明睇懂咗，點解仲要我當冇睇過。我想追問，但佢根本唔肯正面答我。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_bedroom",
+            "job": "保留臥室狹窄空間和暖色低光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "首幀已建立左右位置，影片可直接用畫面左側與畫面右側承接。"
+      },
+      {
+        "scene_id": "SC2",
+        "scene_number": 2,
+        "shot_id": "SC2_SH5",
+        "shot_number": 5,
+        "start_image_prompt": "以圖1作為場景參考，保留臥室房門、狹窄空間和暖色低光；保留圖2中的女孩周曉晴的臉、髮型和圖中服裝；保留圖3中的中年女性李美珍的臉、髮型和圖中服裝。改成靜止中景第一幀：背景是關上的房門。圖2中的女孩站在畫面左側，圖3中的中年女性站在畫面右側，兩人同時看向房門。",
+        "negative_prompt_note": "避免房門打開；避免切到門外人物；避免兩人看向鏡頭；避免手機成為第一眼中心；避免多餘手臂、臉部變形、文字水印。",
+        "video_prompt": "鏡頭守住背景中關上的房門和房內兩人。畫面左側的女孩和畫面右側的中年女性僵住不動，只微微呼吸，像聽見門外男人聲音。不要切到門外，房門不要打開。最後停在兩人看著房門。",
+        "caption": "我仲未等到答案，門外就傳嚟舅父把聲。佢開口仲係咁自然，好似根本冇事。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_bedroom",
+            "job": "保留臥室房門、狹窄空間和暖色低光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "門外聲音不可當成畫面生成目標，只用兩人僵住和看房門表達。"
+      },
+      {
+        "scene_id": "SC2",
+        "scene_number": 2,
+        "shot_id": "SC2_SH6",
+        "shot_number": 6,
+        "start_image_prompt": "以圖1作為場景參考，保留臥室房門、狹窄空間和暖色低光；保留圖2中的中年女性李美珍的臉、髮型和圖中服裝；保留圖3中的女孩周曉晴的臉、髮型和圖中服裝。改成壓迫特寫第一幀：前景是圖2中的中年女性用力攥住黑屏手機的手，手指發白。背景是關上的房門，圖3中的女孩和中年女性一起看向房門。",
+        "negative_prompt_note": "避免手機螢幕亮起；避免手機離開手；避免房門打開；避免多餘手指、畸形手、手指融合、錯誤握持、文字水印。",
+        "video_prompt": "鏡頭從前景的黑屏手機慢慢拉開。手指仍然用力發白。背景中的女孩和中年女性繼續看向關上的房門。手機螢幕不要亮起，最後停在黑屏手機前景和關上房門背景同框。",
+        "caption": "我媽一聽到就即刻將部手機按黑，死死攥住。我同佢只可以一齊望住房門，連聲都唔敢再出。",
+        "reference_assignment": [
+          {
+            "slot": "image1",
+            "anchor_id": "scene_anchor_bedroom",
+            "job": "保留臥室房門、狹窄空間和暖色低光"
+          },
+          {
+            "slot": "image2",
+            "anchor_id": "character_ref_li_meizhen",
+            "job": "保留中年女性的臉、髮型和圖中服裝"
+          },
+          {
+            "slot": "image3",
+            "anchor_id": "character_ref_zhou_xiaoqing",
+            "job": "保留女孩的臉、髮型和圖中服裝"
+          }
+        ],
+        "consistency_note": "本格核心是黑屏手機特寫，手機不可亮起，房門只作背景壓力點。"
+      }
+    ]
+  }
+}
