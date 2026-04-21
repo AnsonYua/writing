@@ -763,14 +763,6 @@ def reference_keep_text(reference_character: str, framing: str, reference_mode: 
 
     return f"保留参考图里{name}的身份感、年龄感和外形连续性。"
 
-
-def parse_int(value: str) -> int:
-    try:
-        return int(str(value).strip())
-    except (TypeError, ValueError):
-        return 0
-
-
 def default_scene_reference(scene: dict, project_output_dir: Path) -> str | None:
     scene_anchor = scene_anchor_filename(str(scene["scene_number"]))
     if (project_output_dir / scene_anchor).exists():

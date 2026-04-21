@@ -1,18 +1,18 @@
 ---
 name: short-drama-scene-pack
-description: Turn an existing short-drama script, outline, or episode draft into a shootable scene pack without changing the storyline. Use when Codex needs to bridge from scriptwriting into production planning by locking scene order, locations, characters, visible actions, emotional turns, key images, and continuity notes for later image, storyboard, or director work.
+description: 將既有短劇 script、outline 或 episode draft 整理成可拍攝的 scene pack，且不改動故事線。用於把寫作素材整理成可供人工交接與後續 skills 直接閱讀的 scene 文檔，鎖定 scene 順序、location、characters、visible action、emotional turn、key image 與 continuity notes。
 ---
 
-# Short Drama Scene Pack
+# 短劇 Scene Pack
 
-Convert a locked short-drama script into a production-ready scene pack.
+把已鎖定的短劇 script 整理成 production-ready 的 scene pack。
 
-This skill is for scene breakdown, not story regeneration. Keep the original storyline intact and make the material easier to shoot, visualize, and continue into later stages.
+這個 skill 用於 scene breakdown，不是 story regeneration。要保持原故事線不變，同時讓素材更容易拍攝、閱讀、視覺化與人工交接。
 
 Read [scene-pack-rules.md](C:\Users\anson\Desktop\writing\out\short-drama-scene-pack\references\scene-pack-rules.md) before building the pack.
 Read [negative-rules.md](C:\Users\anson\Desktop\writing\out\short-drama-scene-pack\references\negative-rules.md) before finalizing the pack.
 
-If the user also provides a character pack, use it to lock visual continuity.
+如果使用者也提供 character pack，就用它來鎖定 visual continuity。
 
 ## Hard Boundary
 
@@ -40,7 +40,7 @@ If a scene is unclear, preserve the story and label the uncertainty.
 
 ## Main Goal
 
-Turn script material into a stable scene-by-scene package that can be reused for:
+把 script 素材整理成一份穩定的逐場 scene 文檔，可重用於：
 
 - image prompt generation
 - storyboard generation
@@ -49,13 +49,13 @@ Turn script material into a stable scene-by-scene package that can be reused for
 - continuity control
 - production review before visual work
 
-This skill should now support structured downstream parsing.
+重點是讓 scene pack 本身清楚、穩定、容易人工交接。
 
-Write the scene pack so it can cleanly feed a JSON workspace pipeline:
+寫 scene pack 時，應該讓欄位清楚、結構穩定、重用方便：
 
-- scene-level fields should stay stable and explicit
-- `scene purpose`, `visible action`, `key image`, `end hook`, and `continuity notes` should be easy to parse into scene JSON
-- do not bury scene-defining information inside long prose paragraphs if a fielded bullet can hold it more clearly
+- scene-level fields 要穩定且明確
+- `scene purpose`、`visible action`、`key image`、`end hook`、`continuity notes` 應該直接可讀
+- 如果欄位式 bullet 已足夠清楚，就不要把 scene 關鍵資訊埋進長段 prose
 
 ## Default Output
 

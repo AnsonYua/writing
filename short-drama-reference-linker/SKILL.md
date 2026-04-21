@@ -1,21 +1,25 @@
 ---
 name: short-drama-reference-linker
-description: Convert one assembled storyboard shot into a downstream-ready multi-reference image-edit prompt after storyboard.json is built. Use when Codex needs to read the canonical storyboard shot, decide what image1/image2/image3 each represent from actual runtime reference mappings, and output a clean reference-linked prompt for Qwen or Comfy image-edit workflows.
+description: 將一格 storyboard shot 轉成多參考圖的 image-edit prompt，且不改動故事線。用於根據實際 reference mappings，決定 image1/image2/image3 各自代表什麼，並產出一條 reference-aware 的 shot prompt。
 ---
 
-# Short Drama Reference Linker
+# 短劇 Reference Linker
 
-Use this skill after storyboard assembly:
+當一格 shot prompt 需要具體 reference assignment 時，就使用這個 skill：
 
-`storyboard.json` -> `short-drama-reference-linker` -> linked prompt package
+shot meaning + actual reference map -> `short-drama-reference-linker` -> reference-aware shot prompt
+
+這個 skill 是獨立的。
+
+它不需要 `linked-storyboard.json`，也不需要獨立的 reference-linking pass。
 
 ## Main Goal
 
-Take one already-assembled storyboard shot and turn its canonical `image_prompt` into one downstream-ready reference-linked prompt.
+Take one storyboard shot and turn its `image_prompt` into one reference-linked prompt.
 
-Use the assembled shot as the source of truth for panel meaning.
+Use the current shot as the prompt meaning reference.
 
-Use the runtime reference mapping as the source of truth for actual image slots.
+Use the runtime reference mapping as the reference for actual image slots.
 
 ## Hard Boundary
 
@@ -25,9 +29,9 @@ Do not:
 
 - redesign the shot
 - rewrite the dramatic function
-- move beats between panels
+- move beats between shots
 - add new plot facts
-- replace the canonical `image_prompt`
+- replace the shot `image_prompt` with a different dramatic meaning
 - review the whole board
 
 Only resolve downstream reference linking for the current shot.
@@ -37,7 +41,7 @@ Only resolve downstream reference linking for the current shot.
 - I do not plan shots.
 - I do not rewrite storyboard structure.
 - I do not do assembled-board pacing review.
-- I do not replace the canonical storyboard prompt.
+- I do not replace the shot prompt's meaning.
 
 ## Required Input Shape
 
@@ -49,19 +53,19 @@ Expect:
 
 ## Required Output Fields
 
-- `resolved_image_prompt`
+- `image_prompt`
 - `reference_assignment`
 - `linking_note`
 
 ## Linking Rules
 
-### Canonical Prompt Preservation Rule
+### Prompt Preservation Rule
 
-Treat the incoming `image_prompt` as the canonical panel meaning.
+Treat the incoming `image_prompt` as the shot meaning.
 
 Do not replace its story intent.
 
-Only rewrite it into a cleaner downstream multi-reference edit prompt.
+Only rewrite it into a cleaner multi-reference edit prompt and return that as the final `image_prompt`.
 
 ### Assignment Rule
 
@@ -94,9 +98,9 @@ Do not write raw markers or placeholder preserve language.
 The linked prompt must answer both:
 
 - what stays stable from each reference
-- what the new panel now looks like
+- what the new shot now looks like
 
-Do not let preserve wording overwhelm the panel itself.
+Do not let preserve wording overwhelm the shot itself.
 
 ### Missing Reference Rule
 
@@ -124,5 +128,5 @@ Before returning:
 - each image slot has one distinct job
 - raw ref markers are gone
 - preserve wording is concrete
-- `resolved_image_prompt` still reads like one drawable panel
+- returned `image_prompt` still reads like one drawable shot image
 - `linking_note` is empty unless a real risk exists

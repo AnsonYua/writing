@@ -1,657 +1,403 @@
 ---
 name: short-drama-shot-planner
-description: Plan ultra-lean storyboard shot skeletons directly from one scene card parsed from scene-pack.md, without changing the storyline. Use when Codex needs to decide which storyboard panels should exist, what each panel must accomplish, what single frozen instant is drawable, what anchor tasks should be created before shot prompt writing, and what concrete anchor inventory each shot should carry for downstream reference linking.
+description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 shot 結構，且不改動故事線。`角色包.md` 是可選補充。用於判斷哪些 shots 需要存在，以及每格 shot 應呈現什麼、讓觀眾讀到什麼。
 ---
 
-# Short Drama Shot Planner
+# 短劇 Shot Planner
 
-Use this skill for the structural pass of the storyboard pipeline:
+當你需要從一張 scene card 規劃 shots 時，就使用這個 skill。
 
-`scene-pack.md` -> `short-drama-shot-planner` -> `storyboard-workspace/shots/*.json`
+## 輸入與輸出
 
-Read [shot-value-rules.md](C:\Users\anson\Desktop\writing\out\short-drama-shot-planner\references\shot-value-rules.md) before locking shots when the scene depends on proof, chemistry, humiliation, danger, reversal, or a strong ending hook.
-Read [shot-fail-patterns.md](C:\Users\anson\Desktop\writing\out\short-drama-shot-planner\references\shot-fail-patterns.md) when the scene feels structurally correct but visually weak, emotionally cold, or commercially flat.
-Read [planner-example.md](C:\Users\anson\Desktop\writing\out\short-drama-shot-planner\examples\planner-example.md) when the user needs an example output shape or when the scene logic risks becoming too abstract.
+- 可用輸入：`scene-pack.md` 或 `scene-pack-fpv.md`
+- 可選輸入：`角色包.md`
+- 輸出：一個 `shots` array
 
-It may also output anchor-planning data for:
+優先順序：
 
-- character anchors
-- scene anchors
-- prop anchors
+- 如果有 `scene-pack.md`，優先跟它規劃，因為它的 scene beat 最清楚
+- 如果只有 `scene-pack-fpv.md`，先把第一人稱正文拆回 scene-level beats，再規劃 shots
+- `角色包.md` 只用來補人物反應、關係感和視線重點，不可新增 beat
 
-## Main Goal
+`scene-pack-fpv.md` 不是自由散文。
+如果它保留了 `Scene 1`、`Scene 2` 之類的 heading，就跟住那些 scene 邊界走。
+不要把上一場和下一場的戲劇工作混在同一組 shots 內。
+如果 `scene-pack-fpv.md` 用了自然第一人稱稱呼，planner 只可借這種語氣去補 `caption`；`shot_description` 仍然只負責畫面。
 
-Act as the structural gate for image-first storyboard generation.
-
-Produce the smallest useful shot task for each panel.
-
-Decide:
-
-- which shots should exist
-- which shots should be merged or deleted
-- what each panel must accomplish
-- what one frozen instant makes that panel drawable as a comic panel
-- whether the panel needs one short caption line
-- what anchor images should be created first so downstream shot prompts have stable reference material
-- what concrete anchor inventory each shot should carry so later skills can link real reference images without guessing
-
-Treat each shot output as a task spec for the prompt writer, not as a half-finished storyboard.
-
-## Quality Priority
-
-The planner is not only choosing valid shots.
-
-The planner must choose the most sellable valid shot.
-
-Before locking each shot, decide internally:
-
-- the panel's dominant audience read
-- the panel's commercial payload
-- the frozen moment that sells both most clearly
-
-When two shots are both logically valid, prefer the one that is:
-
-- more readable at first glance
-- more emotionally charged
-- more commercially attractive
-- more memorable when seen small
-
-## Hard Boundary
-
-Do not change the storyline.
-
-Do not:
-
-- add new plot beats
-- move reveals earlier
-- merge beats in a way that changes story meaning
-- write final shot-level `image_prompt`
-- write `prompt_workflow`
-- write `prompt_output`
-- write scene dialogue blocks
-- write multi-line dialogue design
-- write preserve clauses
-- write continuity engineering fields
-- do assembled-board review
-- do script-level commercial review
-
-Do not pre-write anything that already sounds like a polished image prompt.
-
-Anchor planning is allowed, but only as upstream anchor tasks.
-
-## Not My Job
-
-- I do not write final prompts.
-- I do not choose workflow types for downstream image generation.
-- I do not decide final image1 / image2 / image3 binding.
-- I do not output prompt payloads.
-- I do not write scene dialogue blocks or multi-line dialogue design.
-- I do not review assembled storyboard quality.
-- I do not review viral script commerciality.
-- I do not do final prompt polish for shots.
-
-## Structural Rules
-
-### Comic Panel Logic
-
-Plan each shot like a comic panel:
-
-- one readable story beat
-- one readable visual center
-- one drawable frozen instant
-
-If a beat only works by describing motion across time, reject it or compress it into the payoff frame.
-
-### Dominant Audience Read Rule
-
-Every kept shot should let the viewer understand one thing in one glance.
-
-Ask:
-
-- what should the viewer instantly get from this panel
-- what would the thumbnail-level takeaway be
-- is the intended read strong enough to deserve panel space
-
-If the panel does not have a strong one-glance takeaway, redesign or delete it.
-
-### Commercial Payload Rule
-
-Every kept shot must clearly deliver at least one of these:
-
-- proof readability
-- emotional hit
-- power shift
-- romantic charge
-- humiliation exposure
-- danger pressure
-
-If a shot is technically valid but delivers none of these clearly, merge or remove it.
-
-### Thumbnail Value Rule
-
-Prefer shots that still read when small.
-
-Thumbnail-friendly panels usually have:
-
-- one strong center
-- one strong emotional or proof read
-- clear body-object relation
-- clear power relation
-- clear staging
-
-Do not keep a panel whose value disappears once the image shrinks.
-
-### Hotter Choice Rule
-
-When two candidate panels are equally logical, keep the one with stronger tension, payoff, risk, or exposure.
-
-### Beauty Is Not Enough Rule
-
-Reject visually pretty panels that do not sharpen story pressure.
-
-Do not keep a shot just because it is:
-
-- elegant
-- atmospheric
-- cinematic
-- tasteful
-
-if it weakens:
-
-- proof clarity
-- emotional impact
-- attraction tension
-- threat pressure
-- hook strength
-
-### Scene Surface Vs Payload Rule
-
-When a panel contains both:
-
-- visible surface behavior
-- deeper dramatic payload
-
-use this split:
-
-- `shot_task` = what this panel must accomplish
-- `shot_description` = what the viewer literally sees in the frozen frame
-
-Do not force both layers into the same sentence.
-
-### No Analyst Language Rule
-
-Planner may think structurally, but surfaced output must not read like metadata, tagging, or analyst commentary.
-
-Keep `shot_task`, optional `audience_read`, and `caption` in creative planning language, not analysis language.
-
-### Story-Facing Task Language Rule
-
-`shot_task` should describe the panel's dramatic job in plain creative language a writer or storyboarder would naturally use.
-
-Prefer wording about:
-
-- what the character discovers
-- what pressure lands
-- what visibly changes for the character
-- what escalation the audience now understands
-
-### Single Function Rule
-
-One shot = one dominant dramatic function.
-
-Do not keep a shot that is trying to be:
-
-- proof + reaction + geography
-- setup + escalation + hook
-- transition + confrontation at the same time
-
-### Shot Economy Rule
-
-Every shot must earn its place by doing at least one distinct job:
-
-- deliver proof
-- show emotional payoff
-- establish necessary geography
-- show threat pressure
-- create a causal handoff
-- land the scene-ending hook
-
-If a shot does not add a distinct job, merge or delete it.
-
-### Filler Detection Rule
-
-Delete or merge a shot when it only repeats what the previous shot already proved.
-
-Typical filler patterns:
-
-- another reaction that does not deepen emotion
-- another proof panel at the same information level
-- another transition panel with no new pressure
-- another geography reminder after geography is already clear
-
-### Beat Compression Rule
-
-If two adjacent beats can be compressed into one stronger payoff panel, do not split them.
-
-Prefer:
-
-- one clean payoff frame
-
-over:
-
-- setup frame + almost-the-same payoff frame
-
-### Scene Job Boundary Rule
-
-Do not let the current scene quietly perform the next scene's dramatic job.
-
-Finish the current scene cleanly, then hand off.
-
-### Hook Then Handoff Rule
-
-If the current scene's job is to land first proof or first reaction, end the scene soon after that payoff lands.
-
-Do not automatically continue into deeper escalation unless the scene card itself assigns that job here.
-
-### Causal Handoff Rule
-
-If proof depends on a prop handoff, plant that handoff before the proof shot.
-
-If the audience would ask why the protagonist suddenly has the prop, the plan is missing a causal beat.
-
-### Fake Normal Before Proof Rule
-
-When danger works because it erupts out of ordinary domestic behavior, preserve this order:
-
-1. normality
-2. proof
-3. body reaction
-
-Do not flatten that rhythm.
-
-### Proof Ladder Rule
-
-Proof must escalate from weaker to stronger.
-
-Do not place two proof panels back to back if they reveal the same level of information.
-
-Each later proof panel must do at least one of these:
-
-- confirm that the threat is real
-- show the threat is bigger than first assumed
-- make the threat more personal
-- push the protagonist into a new emotional state
-
-### Emotional Slope Rule
-
-Within one scene, the emotional slope must move forward.
-
-Typical progression:
-
-- normal
-- unease
-- confirmation
-- pressure
-- hook
-
-### Scene Temperature Rule
-
-A scene should not only stay logical.
-
-It should feel progressively hotter, riskier, stranger, more exposing, or more emotionally loaded.
-
-Before finalizing a scene, check:
-
-- does each next panel feel hotter than the previous one
-- is the escalation visible, not only inferable
-- does the ending panel feel like the strongest sellable image in the scene
-
-### Scene-Ending Hook Panel Rule
-
-The last shot in a scene should ideally deliver one of these:
-
-- strongest proof image
-- strongest emotional collapse
-- strongest near-contact or missed-contact
-- strongest power flip
-- strongest threat reveal
-
-### Reaction Trigger Visibility Rule
-
-If a shot is carrying reaction, `shot_description` must let the reader understand what hit the character.
-
-### Trigger Result Balance Rule
-
-In a reaction shot, keep both of these in balance:
-
-- the visible result on the character
-- the reason this result happened
-
-### Reaction Intent Continuity Rule
-
-When the next panel is the same character actively checking the same proof or object, the current reaction panel must already show why the character cannot disengage.
-
-Use visible continuity such as:
-
-- eyes still locked on the object
-- hand still holding or touching it
-- finger still resting near the screen or proof
-- body frozen, but attention not leaving the trigger
-
-Prefer reaction states that already imply the next action.
-
-### No Micro-Justification Rule
-
-Do not solve shot transitions by writing overly fine-grained external reasons such as:
-
-- who turned away first
-- which half-second passed
-- which background action created a tiny opening
-
-### Hold The Object Rule
-
-If the next panel still revolves around the same prop or proof object, the current panel should preserve the character's live relationship to that object.
-
-### Reaction Then Checking Compression Rule
-
-If "got hit by it" and "cannot help checking further" are really one short continuous beat, compress them into one visual line across adjacent panels.
-
-### Proof Readability Rule
-
-If a panel is proof-heavy, the proof should be readable at first glance.
-
-If the proof is too small, too abstract, or too buried:
-
-- redesign the freeze-frame
-- bring the proof closer
-- turn the beat into a clearer visible arrangement
-
-Prefer arrangement-based proof frames over generic "someone checking something" frames unless the checking itself is the drama.
-
-### Chemistry Readability Rule
-
-If a panel is chemistry-heavy, make the charge readable through:
-
-- distance
-- eye line
-- asymmetry
-- interruption
-- near-contact
-- blocked contact
-
-Reject generic "two people facing each other" staging unless the composition itself creates unusual tension.
-
-### Humiliation And Confrontation Readability Rule
-
-If a panel is humiliation-heavy or confrontation-heavy, make social pressure visible through:
-
-- spacing
-- angle
-- crowd relation
-- gesture
-- center ownership
-
-### Intent Visibility Rule
-
-The protagonist's current intent should be inferable from gaze, hands, posture, or object relation.
-
-### Primary Visual Center Rule
-
-`shot_description` should carry only:
-
-- one main subject
-- one main visible action or state
-- one main space cue
-
-### Still Image Feasibility Rule
-
-Reject or rewrite beats that only make sense as:
-
-- first... then...
-- about to...
-- turns and then...
-- wants to speak but stops
-
-### Frozen Multiplicity Rule
-
-If one shot needs to show several related items, repeated instances, or repeated traces, `shot_description` must phrase them as one frozen visible arrangement rather than a sequence of appearance.
-
-### Visible Pattern Rule
-
-If the panel meaning depends on repetition, sameness, or shared source, `shot_description` should name the repeated visible cues that make that pattern readable.
-
-### Field Responsibility Rule
-
-Use fields with clear roles:
-
-- `shot_task`: task proposition only
-- `shot_description`: image proposition only
-- `caption`: optional panel text proposition only
-- `anchor_mapping`: downstream lookup proposition only
-- `audience_read`: optional one-glance takeaway only
-
-### Caption Rule
-
-`caption` is optional.
-
-Default value:
-
-- `""`
-
-Caption format:
-
-- `[角色]: 對白`
-- `[角色心聲]: 內心獨白`
-
-Use caption only when one short panel line materially strengthens the panel.
-
-### Caption Referent Clarity Rule
-
-If a pronoun or vague reference could reasonably point to more than one person, object, or source inside the current panel context, rewrite it into a concrete referent.
-
-### Inner Caption Authenticity Rule
-
-Inner-monologue caption should sound like immediate human thought, not analytic summary.
-
-### Caption Not Bridge Rule
-
-`caption` may strengthen pressure, relationship, or inner thought, but it must not carry transition logic that the image failed to show.
-
-### Focus Conflict Check
-
-If `shot_task` and `shot_description` imply different visual centers, the shot design is drifting.
-
-### Overload Budget Rule
-
-If `shot_description` keeps needing side notes to make sense, the panel is overloaded.
-
-In that case:
-
-- compress the shot
-- simplify the image center
-- or move the extra logic into another panel only if it has its own distinct function
-
-## Field Proposition
-
-### `shot_task`
-
-Answers:
-
-- what must this panel accomplish
-
-Downstream use:
-
-- prompt-writing uses it to decide what must dominate the final image prompt
-- review uses it to catch duplicate-function or weak-function panels
-
-### `shot_description`
-
-Answers:
-
-- what do we literally see in the frozen frame
-
-Downstream use:
-
-- prompt-writing uses it as the visual base sentence
-- review uses it to check still-image readability
-
-### `caption`
-
-Answers:
-
-- does this panel need one short text line
-- if yes, what is the shortest useful line
-- if the line is spoken dialogue or inner monologue
-
-### `anchor_mapping`
-
-Answers:
-
-- what reference assets are available downstream
-
-### `audience_read`
-
-Answers:
-
-- what the viewer should understand in one glance
-
-When to include:
-
-- include only when it helps downstream prompting or review keep the shot's strongest read
-- omit it when `shot_task` and `shot_description` already make the one-glance takeaway obvious
-
-Format:
-
-- one short phrase only
-
-Examples:
-
-- `她看到不能存在的照片`
-- `他明明靠近，卻像隔著一層世界`
-- `這一刻她知道自己被設局了`
-
-## Anchor Mapping Rule
-
-Every shot should carry a concrete `anchor_mapping` block.
-
-Each mapped anchor should include:
-
-- `anchor_id`
-- `object_name`
-- `anchor_type`
-- `role_hint`
-
-Use only light role hints such as:
-
-- `main_character`
-- `support_character`
-- `scene_space`
-- `proof_prop`
-- `carry_over_prop`
-
-## Anchor Planning Rule
-
-When a scene or episode clearly depends on stable references, plan anchor tasks up front.
-
-Typical anchor categories:
-
-- `character_anchor`
-- `scene_anchor`
-- `prop_anchor`
-
-Create an anchor task when one of these is true:
-
-- the same character must stay visually stable across multiple shots
-- the same room layout must be reused across multiple shots
-- the same prop carries proof or recurring continuity value
-
-Each anchor task should include:
-
-- `anchor_id`
-- `anchor_type`
-- `anchor_goal`
-- `anchor_brief`
-- `image_prompt`
-- `must_keep`
-
-`image_prompt` should:
-
-- be written in clean Traditional Chinese
-- be usable as a standalone image-generation prompt
-- stay focused on neutral anchor creation
-- avoid scene-specific acting unless the anchor itself is a scene anchor
-
-## Output Requirements
-
-Each shot must output:
+每個 shot object 必填：
 
 - `scene_id`
 - `scene_number`
 - `shot_id`
 - `shot_number`
-- `shot_task`
-- `shot_description`
-- `caption`
-- `anchor_mapping`
+- `shot_description`：這格 shot 主要呈現什麼，可見內容為主，也可帶少量戲劇性總結；一律用第三方可視角度描述，寫法盡量更接近鏡頭 / 分鏡語言
+- `caption`：這格 shot 對位的主角獨白，必填
+- `audience_read`：觀眾在這格 shot 應立即讀到的資訊
 
-Optional when useful:
+每個 shot object 可選：
 
-- `audience_read`
+- `motion_note`：如需要支援 video prompt，補充角色動作、鏡頭移動、節奏或時間推進
 
-When anchor planning is needed, also output an `anchor_tasks` block.
+如需要一個完整 `shots` array JSON 輸出例子，可參考 `examples/planner-example.md`。
 
-## Downstream Dependency Note
+## 核心規則
 
-`short-drama-shot-prompt` should consume this contract directly:
+### 1. 只規劃當前 scene 的 shot
 
-- `shot_task`
-- `shot_description`
-- `caption`
-- `anchor_mapping`
-- optional `audience_read`
+不要改動故事線。
 
-## Anti-Pattern Warnings
+規劃每一格 shot 之前，先鎖定這一格的唯一核心 beat。
+先問自己：這一格最重要的，究竟是：
 
-Do not write shots like this:
+- 交手機
+- 見怪相
+- 再確認
+- 等對方反應
+- 對方開口
+- 門外壓力逼近
 
-- main image + continuity memo + next-step foreshadowing all in one sentence
-- unclear main subject but many props
-- prop details louder than the dramatic job
-- a reaction panel that only shows the result but hides the cause
-- a character staring panel that reads like idle thinking instead of being hit by something
-- a caption that explains the panel because the image is not clear enough
-- several related items described as if they appear over time instead of being visible in one arrangement
-- a structurally valid panel that has weak thumbnail value
-- a pretty frame that contributes no pressure, charge, or hook
-- a chemistry frame that could be replaced by any generic two-shot
-- a humiliation frame where the social power relation is not visible
+只可以揀一個最核心的。
+不要一開始就把兩個以上 beat 塞進同一格，再靠 wording 補救。
 
-## Planner Self-Check
+如果輸入是 `scene-pack-fpv.md`，先做這一步：
 
-Before returning shots for a scene, check:
+- 找出每個 scene 真正發生了什麼
+- 抽回可見動作、turning point、場尾 hook
+- 把純內心總結當成節奏參考，但要把每個核心 beat 重新寫成對位的 shot caption
+- 如果一句話沒有可見動作、物件、關係或壓力變化，通常不值得獨立成 shot
 
-- no duplicate-function filler panels remain
-- no proof panels repeat the same information level
-- no panel depends on motion across time to be understood
-- every `shot_task` is compact but complete
-- every `shot_description` is readable as a panel task on its own
-- every proof-heavy panel makes the proof readable at first glance
-- every chemistry-heavy panel makes charged distance, gaze, asymmetry, or blocked contact readable
-- every humiliation or confrontation panel makes social pressure visibly legible
-- the protagonist's intent is inferable from gaze, hands, posture, or object relation
-- the scene grows hotter, riskier, stranger, or more exposing across shots
-- the final shot is the strongest sellable hook image available in the scene
-- every `caption` is either `""` or one short useful line
-- every anchor task has a clear reuse reason
-- optional `audience_read`, when present, is short and stronger than the panel's generic summary
+不要：
 
-## Output Shape
+- 新增 plot beats
+- 提前 reveal
+- 用會改變故事意思的方式合併 beats
+- 寫最終 `image_prompt`
+- 寫 `prompt_workflow`、`prompt_output`
+- 寫 scene dialogue blocks 或多行 dialogue design
+- 做 assembled-board review 或 script-level commercial review
 
-Return machine-usable shot skeleton JSON for the current scene only.
+定完唯一核心 beat 之後，再寫三欄：
 
-Keep the output lean.
+- `shot_description`：呈現這個 beat 的畫面
+- `caption`：主角對這個 beat 的旁白
+- `audience_read`：觀眾從這個 beat 讀到的戲劇功能
 
-If anchors are needed, return:
+如果發現三欄分別在講不同 beat，就代表這格應重寫或拆 shot。
 
-- one scene-level shot list
-- one lean `anchor_tasks` list
+### 2. 先確保這格 shot 看得明
+
+每一格 shot 都要讓觀眾一眼知道這格在交代什麼。
+
+至少要清楚讀到：
+
+- 這格正在交代哪個 beat
+- 這格的畫面中心是什麼
+- 場景、人物與動作之間的關係
+
+如果某個 beat 無法清楚寫成一格 shot，就不要直接保留；要嘛刪掉，要嘛改寫成更清楚的一格。
+
+不要保留需要額外解說才看得懂的 shot。
+
+如果來源是 `scene-pack-fpv.md`，不要直接把這類句子原樣翻成 shot：
+
+- 大段回望總結
+- 單純講感受、但畫面未落地的句子
+- 重覆前一段已成立意思的 self-commentary
+
+同一格入面，`shot_description` 同 `caption` 要對位。
+如果 `shot_description` 寫了某個前置動作、條件或節點，例如「等對方走開後」「確認門已關上後」「看到她先望門口」，`caption` 也要承接這個節點。
+如果 `caption` 不承接，而這個前置動作又不是當下核心畫面，就應直接從 `shot_description` 刪走。
+換句話說，每格 shot 只保留 `caption` 真係需要承接的前置節點。
+如果某個前置節點只係為了合理化動作，但刪走之後這格畫面和 caption 仍然成立，就不要保留。
+每格輸出前，再做一次反向檢查：
+
+- `shot_description` 的核心畫面節點是什麼
+- `caption` 是否真的承接了同一個核心 beat
+
+如果答案不是，就要二選一：
+
+- 刪走 `shot_description` 內非核心、caption 無承接的部分
+- 或補 `caption`，令它承接該核心節點
+
+不要交出：
+
+- `shot_description` 講 A + B
+- `caption` 只講 B
+- 但 A 又仍然留在畫面描述內
+
+呢種輸出表面上似完整，其實畫面同旁白已經輕微錯位。
+
+同類錯位不只會發生在前置動作，亦常見於以下幾種情況：
+
+- `shot_description` 的畫面中心是「主角正等某個反應」，`caption` 卻直接跳去結果
+- `shot_description` 先交代觸發點，`caption` 卻只講情緒，不講觸發
+- `shot_description` 寫了明顯的結果翻轉，`caption` 卻只停在前一層理解
+- 同一格其實塞了兩個 beat，導致 `caption` 只能承接其中一半
+
+這些情況都應視為未對位，處理方式一樣：
+
+- 刪去非核心部分
+- 或拆 shot
+- 或補 `caption`
+
+尤其當畫面中心是「等一句話」「盯住對方反應」「等門外動靜」時，`caption` 不可直接跳到結論，至少要輕量帶出這個等待動作。
+
+不要出現這種失配：
+
+- `shot_description` 有「等舅父走開後」
+- `caption` 卻直接從「我再滑落去」起手
+
+這種情況會令畫面和旁白像在講兩個不同版本的 beat。
+亦會白白拉長 `shot_description`，逼到 `caption` 為了對位而變長。
+
+### 3. 這格 shot 要值得存在
+
+不要保留內容太相似、讀感太相似、或只是重覆上一格已經成立意思的 shot。
+
+常見應刪或應合併的情況：
+
+- 又一格差不多的 proof
+- 又一格差不多的 reaction
+- 又一格沒有新增壓力的 transition
+- 只是換了角度，但觀眾讀到的仍然是同一件事
+
+只有在以下其中一項真的變得更清楚時，才值得多保留一格：
+
+- 證據更清楚
+- 情緒更重
+- 權力關係變了
+- 危險更近
+- 結尾勾子更強
+
+如果兩個相鄰 beats 可以壓成一格更清楚、更有力的 shot，就不要硬拆。
+
+當兩格 shot 都合理時，優先保留更有戲的一格：
+
+- 張力更高
+- 暴露感更強
+- 收束更強
+- 勾子更強
+
+不要只因為畫面漂亮就保留一格 shot。
+
+如果它削弱以下任何一項，就不應保留：
+
+- 證據清晰度
+- 權力可讀性
+- 曖昧張力
+- 羞辱力度
+- 結尾勾子強度
+
+### 4. `shot_description`、`caption`、`audience_read` 與 `motion_note` 要分工清楚
+
+- `shot_description`：寫這格 shot 主要呈現什麼，只用第三方、可視角度描述
+- `caption`：這格 shot 的對位旁白句，用主角獨白去跟畫面一齊講故事
+- `audience_read`：寫觀眾第一眼應立即讀到什麼
+- `motion_note`：如有需要，寫角色動作如何延續、鏡頭如何移動、節奏如何落
+
+例如：
+
+- `shot_description` 要寫場景、人物、動作、物件位置；也可以帶少量戲劇性總結，讓人知道這格 shot 整體在呈現什麼
+- `shot_description` 不用 `我媽`、`我見到`、`我以為` 呢類主觀說法；主角語氣只可放喺 `caption`
+- `shot_description` 優先順序：先講畫面中心，再講角色動作，最後先補壓力或戲劇作用
+- `shot_description` 盡量避免完整 prose 感；普通人一眼睇落去，應該即刻想像到鏡頭點樣拍
+- `caption` 一律用第一人稱、口語、貼住當下 shot，讀起來要似短視頻口播 / 獨白講故仔
+- `caption` 默認寫成 1 到 2 句，並應以 2 到 3 秒內可自然讀完為上限；只有場尾 hook 或重大翻轉先可到第 3 句
+- `caption` 要一聽即明，優先用最直白的說法；不要寫到觀眾要回想前文先完全聽得明
+- `caption` 可以短，但不可以空；如果這格核心係證據內容、證據點樣指向主角、對方做咗咩反應、或者危險點樣逼近，caption 至少要講出一層具體內容
+- `audience_read` 可以寫觀眾第一眼已確認是偷拍證據、已感到她不敢再看下去、已感到對方逼得太近
+- `motion_note` 可以寫鏡頭慢慢推近、角色手指停住後再輕微放大、畫面節奏先僵住再往證據逼近
+
+`shot_description` 可以包含少量抽象總結，例如「氣氛變得更危險」或「關係開始失控」，但不能只有抽象總結；仍然要有足夠的場景、人物、動作或物件資訊，讓下游 prompt 能翻成可見畫面。
+
+沒有明顯 motion 需求的 shot，可省略 `motion_note`。
+
+`caption` 不是可選補強，而是每格 shot 都要有的對位旁白句。
+所有 shot 的 `caption` 由頭讀到尾，應該可以完整講清楚成場戲，甚至整段故事。
+所以 `caption` 不能只得零散情緒句，也不能只得 reaction，必須跟住故事推進去講：
+
+- 我見到乜
+- 我點確認
+- 我搵邊個求助
+- 對方點反應
+- 危險點樣逼近
+
+`caption` 要寫得短、口語、可直接當旁白，不寫 analysis，不寫 metadata，也不可偷帶下一格才揭露的資訊。
+`caption` 要緊貼該格畫面，但不要一條塞太多資訊；一格只講一個核心推進。
+如果一條 `caption` 喺 2 到 3 秒內讀唔完，默認應視為該格寫得太長，或者該格本身應拆 shot。
+但短唔等於可以用空泛代指帶過核心資訊。
+不要把整句主體寫成呢類句：
+
+- `有啲嘢唔對路`
+- `同我有關`
+- `我即刻知道出事`
+- `我開始覺得唔妥`
+- `佢個反應令我明白晒`
+
+如果這格真正重要的是：
+
+- 我睇到咩證據
+- 幾張相點樣明顯影到我
+- 我媽先有咩反應，之後先講咗咩
+- 門外壓力點樣逼近
+
+咁 `caption` 就要至少講出其中一層具體內容，唔可以只剩抽象結論。
+`caption` 唔只要交代資訊，仲要有少少 hook 感，令觀眾自然想追下一格。
+如果一句 `caption` 只是平鋪直敘地交代資料，雖然可能正確，但對短視頻來說通常仍然太平。
+如果這格是故事開頭、日常入口、或表面平靜的起手 shot，`caption` 可以補一點很短的前奏感或錯覺感，例如「我仲以為冇咩特別」「我嗰陣以為只係一件小事」。
+但這種補法只可以很短，目的是加 hook，不是加背景說明。
+同樣地，如果這格需要更有收束感或吊住感，句尾亦可以補一小段很短的錯覺感、誤判感或平靜假象，例如「我仲以為冇事」「我以為只係小事」「我仲未知出事」。
+但句尾補法只應該係短短一刀，唔可以加成完整解釋句，更唔可以令整條 caption 超過 2 到 3 秒。
+如果第二句只是在補充背景、合理化資訊，或者只是把第一句再講厚一點，優先刪掉。
+但如果刪走之後，剩返的第一句已經聽唔清楚這格到底發現了什麼、確認了什麼、或者失去了什麼，就代表刪過頭，應改寫成更短但更具體的版本。
+換句話說，非關鍵資訊要優先讓路，但核心可理解資訊不可讓路。
+短 shot 的 caption 應先保留最核心、最有推進力、最有 hook 感的部分。
+刪完之後，要再檢查一次：留下來的 `caption` 是否仍然和 `shot_description` 對位。
+如果一條 `caption` 同時包含：
+
+- 承接上一格情緒
+- 新事件進場
+- 對事件再作總結判斷
+
+通常已經過載，應優先拆 shot 或壓短 caption。
+一條合格的 `caption`，至少要做到以下其中兩樣，最好自然包含三樣：
+
+- 講清楚當下畫面發生乜事
+- 講清楚主角當下點理解、點誤判，或者點確認
+- 講清楚主角當下最直接的情緒反應
+
+對普通觀眾來說，最理想的 `caption` 係：
+
+- 第一次聽就明
+- 聽完即刻知道呢格推進咗乜
+- 有少少 hook 感，會想追下一格
+
+交付前再做一次首次收聽檢查：
+
+- 假設觀眾未必完全睇清畫面，只係一邊睇一邊聽一次 `caption`
+- 聽完之後，應該即刻知道這格最重要的戲劇推進係乜
+- 如果換走畫面之後，`caption` 只剩模糊感受、抽象判斷或空泛代稱，就代表未過關
+
+如果 `shot_description` 內含前置節點，`caption` 也要至少輕量帶出同一節點，或者 `shot_description` 就不要寫它。
+如果 `shot_description` 已經寫到很具體，例如偷拍照片連續出現、主角一直盯住對方反應、或者對方先望門口再開口，`caption` 至少要承接同一層級的核心資訊，不可把具體畫面降格成模糊感受句。
+
+例如：
+
+- `舅父將部手機遞畀我，叫我幫手拎去充電。我嗰陣仲以為只係一件小事。`
+- `嗰晚食完飯，舅父將部手機遞畀我，叫我幫手拎去充電。我仲以為冇咩特別。`
+- `舅父將部手機遞畀我，叫我幫手拎去充電。嗰陣我仲以為，根本冇事。`
+- `我一低頭想插線，就見到螢幕停咗喺一張相度。第一眼已經覺得唔對路。`
+- `我再滑落去，先知入面唔止一張。幾張相，我一眼就知係偷拍我。`
+- `我一直望住我媽個樣，等佢開口幫我。點知佢第一句，係叫我唔好講出去。`
+- `我媽一睇完，第一句唔係問我有冇事。`
+- `門外一傳嚟舅父把聲，我成個人即刻僵住。`
+- `到嗰下我先知，最驚唔係張相，係屋企入面嗰個人。`
+
+對位版本：
+
+- `shot_description`: `周曉晴急促地打開相簿往下滑；同一個家裡不同角落的偷拍照片連續出現，當中幾張明顯和她有關，她盯住螢幕，呼吸開始亂。`
+- `caption`: `我再滑落去，先知入面唔止一張。幾張相，我一眼就知係偷拍我。`
+
+如果一定要保留前置節點：
+
+- `shot_description`: `等陳國強走開後，周曉晴急促地打開相簿往下滑；同一個家裡不同角落的偷拍照片連續出現。`
+- `caption`: `等舅父一走開，我就即刻打開相簿再滑落去。越睇我越知，入面唔止一張偷拍相。`
+
+更常見、更應優先採用的版本：
+
+- `shot_description`: `周曉晴急促地打開相簿往下滑；同一個家裡不同角落的偷拍照片連續出現。`
+- `caption`: `我再滑落去，先知入面唔止一張。`
+
+如果第二句只係補充背景，不如刪掉；但如果第二句先講清楚核心資訊，就要改短，不是直接刪清光：
+
+- `原版 caption`: `我再滑落去，先知入面唔止一張。幾張相，我一眼就知係偷拍我。`
+- `太空版本`: `我再滑落去，就知唔係一張咁簡單。`
+- `優先版本`: `我再滑落去，先知入面唔止一張偷拍我嘅相。`
+
+不要寫成：
+
+- `嗰晚一開始，其實真係好普通。`
+- `我第一眼就知唔對路。`
+- `入面有幾張，我一眼就認得出同我有關。`
+- `我當時進入了一個很不安的狀態。`
+- `當時家裡的氣氛其實仍然十分平靜。`
+- `我完全沒有意識到接下來將會發生可怕的事情。`
+- `我當時尚未意識到真正的危險即將展開。`
+- `shot_description`: `確認陳國強走開後，周曉晴急促地打開相簿往下滑……`
+- `caption`: `我再滑落去，就知唔係一張咁簡單……`
+- `這裡主角開始意識到危險`
+- `母女關係在此正式破裂`
+- 太長的完整段落旁白
+
+### 5. 輸出語氣要像創作規劃
+
+planner 可以在內部做結構思考，但輸出不要寫成 metadata、tagging 或分析備註。
+
+`audience_read`、`caption` 都要用創作規劃語氣，不要用分析語氣。
+如果 `caption` 已講咗核心情緒翻轉，`audience_read` 就應偏向戲劇功能、資訊層或權力變化，不應只是 `caption` 的縮寫版。
+同一格內，`shot_description`、`caption`、`audience_read` 不可講同一句話三次。
+`caption` 主要講主角此刻經歷緊乜，`audience_read` 主要講觀眾因此讀到乜戲劇功能。
+不要兩欄都直接寫「她求助失敗了」這類同一句意思。
+
+如果輸入是 `scene-pack-fpv.md`，planner 可以借用它的情緒重心和主角視角，
+但最後交付仍然要是 shot 規劃，不是把第一人稱旁白整段搬入 `caption`。
+`shot_description` 保持畫面優先，`caption` 才承接主角聲音與敘事串接。
+
+交付前最後自查：
+
+- `shot_description` 同 `caption` 是否講同一個核心 beat
+- `caption` 是否有承接 `shot_description` 的核心畫面節點
+- `caption` 是否跳過了畫面中正在等待、確認、觀察的動作
+- `shot_description` 是否偷偷塞了第二個 beat，令 `caption` 無法完整承接
+- `audience_read` 是否只是在重覆 `caption`
+- 如果兩者有錯位，是否已刪掉多餘畫面資訊，或補回對位 caption
+
+## Shot 類型參考
+
+以下內容是常用參考，用來幫你規劃特定類型的 shot；不是每格都要逐條套用。
+
+### Proof 類 shot
+
+- proof 要第一眼可讀
+- 最好讓幾個可疑項目或證據關係在同一個畫面裡已經講清楚
+- 如果 proof 太小、太抽象、或埋得太深，就要重寫 shot 呈現方式
+- 避免泛泛的「有人在看手機」而看不出證據本身
+- 不要連續放兩格只揭示同一層級資訊的 proof shot
+
+### Reaction 類 shot
+
+- `shot_description` 要讓讀者知道到底是什麼擊中了角色
+- reaction 最好和觸發物同時保持可見關係
+- 如果下一格會延續去查看同一個 object 或 proof，這格 reaction 要先交代角色為何無法抽離
+- 不要只寫 generic shocked pose
+
+### Chemistry / confrontation 類 shot
+
+- chemistry 要透過距離、視線、幾乎接觸、接觸被阻隔等可見線索成立
+- 不要只寫兩個人站在一起，而沒有張力
+- confrontation 或羞辱要把權力關係與社會壓力視覺化
+- 要看得出誰在施壓、誰在承受
+
+### 弱 shot 常見模式
+
+以下情況通常代表這格 shot 太弱，應重寫、合併或刪掉：
+
+- 只有「角色愣住」或「角色呆望」，但看不出觸發點
+- 只有「她在看手機」，但看不出真正重要的是什麼
+- 兩個人互相面對，但沒有距離張力或權力差
+- 房間很靚、光線很好，但沒有戲劇中心
+- 兩個人在 confrontation，但觀眾看不出誰控制當下
+
+保留偏弱 shot 前，先問：
+
+- 觀眾第一眼到底讀到什麼
+- 這格真正有價值的是什麼
+- 這個版本比旁邊其他可行版本強在哪裡
+- 有沒有只是換角度，但其實重覆了同一個讀感
+- 這格有沒有把證據、壓力、吸引力或翻轉清楚放進畫面
+
+### Scene handoff
+
+- 不要讓當前 scene 偷偷完成下一個 scene 的戲劇工作
+- 如果當前 scene 的工作已經落地，應盡快交棒
+- scene 結尾那格 ideally 要像本場最值得保留的一格

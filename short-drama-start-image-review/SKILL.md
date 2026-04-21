@@ -1,19 +1,19 @@
 ---
 name: short-drama-start-image-review
-description: Review an assembled image-first storyboard or linked-storyboard output at shot, scene, or board level without changing the storyline. Use when Codex needs a production-facing editorial check on panel readability, continuity, proof escalation, hook hierarchy, linked multi-reference clarity, and handoff readiness after storyboard assembly.
+description: Review an image-first storyboard output at shot, scene, or board level without changing the storyline. Use when Codex needs a production-facing editorial check on panel readability, continuity, proof escalation, hook hierarchy, multi-reference clarity inside prompts, and handoff readiness.
 ---
 
 # Short Drama Start Image Review
 
-Use this skill after storyboard assembly:
+Use this skill when you need editorial review on a storyboard:
 
-`storyboard.json` / `storyboard.md` / `linked-storyboard.json` -> `short-drama-start-image-review`
+`storyboard.json` / optional `storyboard.md` -> `short-drama-start-image-review`
 
-I am the storyboard-assembled, high-level production/editorial reviewer.
+This skill is independent.
 
 ## Main Goal
 
-Review whether the assembled storyboard is actually ready to hand off to the next operator.
+Review whether the storyboard is actually ready to hand off to the next operator.
 
 Check:
 

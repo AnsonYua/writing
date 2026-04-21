@@ -1,504 +1,143 @@
 ---
 name: short-drama-shot-prompt
-description: Write one Qwen-Image-ready still-image prompt plus one carried-forward panel caption for one approved storyboard shot JSON without changing the storyline. Use when Codex needs to turn one already-planned shot into one clear single-panel image prompt that trusts existing anchors, writes from camera/image space rather than story-summary space, and preserves planner-provided caption text.
+description: 將一格一般 shot 描述轉成一條 Qwen-Image 可用的單格圖片 prompt，並帶上可選 caption，且不改動故事線。用於把 shot 描述轉譯成單張圖片需求，以 camera / image space 而不是 story-summary space 來表達。
 ---
 
-# Short Drama Shot Prompt
+# 短劇 Shot Prompt
 
-Use this skill for the prompt-writing pass of the storyboard pipeline:
+當你需要把一格 shot 描述轉成一條單格圖片 prompt 時，就使用這個 skill。
 
-`output/storyboard-workspace/shots/*.json` -> `short-drama-shot-prompt` -> `output/storyboard-workspace/prompts/*.prompt.json`
+## 輸入與輸出
 
-Read [shot-value-rules.md](C:\Users\anson\Desktop\writing\out\short-drama-shot-prompt\references\shot-value-rules.md) before prompt writing when the current shot depends on proof, chemistry, humiliation, danger, reversal, or a strong thumbnail read.
-Read [shot-fail-patterns.md](C:\Users\anson\Desktop\writing\out\short-drama-shot-prompt\references\shot-fail-patterns.md) when a prompt feels technically correct but visually flat, generic, or too safe.
-Read [prompt-example.md](C:\Users\anson\Desktop\writing\out\short-drama-shot-prompt\examples\prompt-example.md) when the user needs a concrete before-and-after style target.
+必要輸入：
 
-## Main Goal
+- `shot_description`
 
-Take one approved planner shot and write one clean Qwen-Image prompt for that shot only.
+可選輸入：
 
-Planner output is the source of truth.
+- `shot_id`
+- `caption`
+- `audience_read`
+- `anchor_mapping`
 
-This skill does one job:
+輸出：
 
-- convert one approved shot task into one still-image prompt that reads like a camera-facing image request
+- `shot_id` optional
+- `image_prompt`
+- `caption`
 
-Success condition:
+`anchor_mapping` 只是可選支援資料，不是核心必要欄位。它的作用是幫你縮短 prompt，而不是成為 prompt 的主體。
 
-- someone reading the prompt can imagine the exact panel without extra explanation
-- the prompt reads like an image-generation prompt, not a story note
-- the prompt stays focused on what the camera sees in this one frame
-- the prompt preserves the panel's strongest dramatic payload instead of flattening it
+## 核心邊界
 
-## Core Proposition
+這個 skill 只負責把當前 shot 壓成一張圖片 prompt。
 
-Use the current shot as a task card:
-
-- `shot_task` answers: why this panel exists
-- `shot_description` answers: what the frozen frame visibly is
-- `anchor_mapping` answers: what stable elements already exist downstream
-- optional `audience_read` answers: what the viewer should get in one glance
-- `image_prompt` answers: how to render this panel as one image
-
-`shot_task` helps decide image priority.
-
-`shot_description` is the main writing base.
-
-`anchor_mapping` is not the main subject of the prompt. Its value is that it lets the prompt stay shorter and cleaner.
-
-If a sentence does not change what the image looks like, do not keep it in the prompt.
-
-If a stable scene, character, or item already exists in `anchor_mapping`, do not treat the prompt as a place to complete that missing setup again.
-
-## Hard Boundary
-
-Do not change the storyline.
-
-Do not:
+不要：
 
 - question shot count
-- merge or split shots
+- merge 或 split shots
 - move a beat to another scene
 - redesign shot structure
 - invent new plot information
-- write image1 / image2 / image3 assignment
-- write reference-linking plans
-- write preserve-clause engineering language
-- output workflow notes inside the prompt
-- answer for neighboring shots
+- 寫 `image1` / `image2` / `image3` assignment
+- 寫 reference-linking plans
+- 把 shot 改成另一個更方便出圖的意思
 
-If the shot itself is weak, still write the best prompt for the current shot. Do not silently replan it.
+如果 shot 本身偏弱，都要先忠實寫出當前這格的最佳 prompt，而不是偷偷重規劃。
 
-## Not My Job
+## 寫法重點
 
-- I do not redesign shot structure.
-- I do not merge or delete shots.
-- I do not review assembled board pacing.
-- I do not design reference binding.
-- I do not write multi-image assignment.
-- I do not output post-storyboard linked prompts.
-- I do not add continuity burdens not already justified by the shot itself.
-- I do not invent dialogue or caption that the planner did not provide.
-- I do not write SFX fields.
+這個 skill 主要從以下欄位讀意思：
 
-## Required Input Shape
+- `shot_description`：這格 shot 畫面上要見到什麼
+- `audience_read` optional：觀眾第一眼應讀到什麼
 
-Expect the current shot payload to primarily provide:
+寫 prompt 時，優先順序是：
 
-- `scene_id`
-- `scene_number`
-- `shot_id`
-- `shot_number`
-- `shot_task`
-- `shot_description`
-- `caption`
-- `anchor_mapping`
+1. 第一眼要見到什麼
+2. 主要人物或主體
+3. 可見動作、姿勢、proof 或 prop 關係
+4. 最少但必要的空間提示
+5. 只有在有助讀感時才加光線或氣氛
 
-Optional support input:
+## 核心規則
 
-- `audience_read`
-- `scene_context_summary`
-- `previous_shot_summary`
+### 1. One shot, one image
 
-Treat `anchor_mapping` as compression support, not as prompt cargo.
+一格 shot 就是一張圖片。
 
-Treat `anchor_mapping` as existence proof for stable scene, character, and item information that downstream can already resolve.
+不要把一格 shot 寫成小型 sequence。
 
-When an anchored person, place, or item does need to be named in the prompt, use the exact `object_name` wording from `anchor_mapping` instead of inventing a new synonym.
+畫面要寫成已經成立的可見狀態，不是正在發生中的 transition。
 
-## Required Output Fields
+### 2. 從 image space 出發
 
-- `shot_id`
-- `image_prompt`
-- `caption`
+prompt 要從鏡頭實際看見的內容出發，而不是從故事摘要、作者意圖、觀眾感受出發。
 
-## Output Placement
+優先寫：
 
-Default output location:
+- framing / shot distance
+- 主體放在畫面哪裡
+- 可見動作或姿勢
+- 關鍵 proof 或 prop 的位置
+- 最少房間提示
 
-- `output/storyboard-workspace/prompts/`
+### 3. 保住這格的戲劇重心
 
-Default filename pattern:
+如果這格賣的是 proof，就讓 proof 先讀到。
 
-- `{shot_id}.prompt.json`
+如果這格賣的是羞辱、危險、曖昧或 confrontation，就把張力透過距離、姿勢、視線、阻隔、負空間或物件接觸寫出來。
 
-Example:
+不要把真正的 hook 埋在中性背景描述後面。
 
-- `output/storyboard-workspace/prompts/S1_SH1.prompt.json`
+### 4. 只寫畫面需要的東西
 
-Default behavior:
+保留：
 
-- create the prompt result in the prompts folder
-- if `{shot_id}.prompt.json` already exists, overwrite it with the newest accepted result
-- do not write prompt results back into the original shot JSON by default
+- 讓這格成立的主體
+- 讓這格可讀的動作
+- 讓這格夠具體的少量空間或物件信息
 
-This skill should assume the prompt file is the canonical output artifact for one shot prompt pass.
+刪掉：
 
-## Internal Work Order
+- 故事摘要
+- 作者解說
+- workflow memo
+- 與當前畫面無關的 setup 補完
+- 只為了好看而加入、但會削弱主讀感的裝飾
 
-Before writing the final JSON, do this internally:
+### 5. 信任可選 anchors
 
-1. read `shot_task` and optional `audience_read`
-2. choose the panel's first-look center
-3. choose the panel's commercial payload
-4. choose the visual priority order
-5. read `shot_description` and identify the visible subject, framing, action, prop state, and space cue
-6. check `anchor_mapping` and suppress any stable look, stable space, or stable item re-description that the image does not need
-7. write one prompt from camera/viewpoint language
-8. carry forward the planner-provided `caption`
-9. self-check for:
-   - story-summary voice
-   - re-describing stable anchored looks
-   - re-describing stable anchored scene or item setup
-   - workflow memo smell
-   - two time steps in one prompt
-   - weak first-look center
-   - flat neutral description where the panel should feel charged
-   - caption does not repeat the whole image prompt
+如果 `anchor_mapping` 已經提供穩定的人物、場景或物件資訊，除非當前畫面真的需要，否則不要重覆交代那些穩定外觀或穩定設定。
 
-Only output the final JSON.
+anchor 的價值是令 prompt 更短、更乾淨，不是令 prompt 更長。
 
-## Priority Lock
+### 6. `shot_description` 是主基礎
 
-Before wording the prompt, explicitly decide internally:
+`shot_description` 是 prompt 的主要基礎。
 
-- what the viewer sees first
-- what the image is selling
-- what must stay most legible
+可以把它翻成更自然的 image language，但不要把它改成另一個 shot idea。
 
-Default priority order:
+`audience_read` 主要用來決定哪個部分要佔主導，不要機械式重述。
 
-1. main dramatic center
-2. visible emotional state
-3. proof, prop, or person relation
-4. room cue
-5. light or atmosphere only if it sharpens the read
+## 常見失誤
 
-If a later detail weakens an earlier priority, cut the later detail.
+以下寫法通常要重寫：
 
-## Prompt Rules
+- `starts to`
+- `suddenly`
+- `is about to`
+- `turns and then`
+- `this shot should express`
+- `create a feeling of`
+- 用長篇背景說明蓋過當前畫面
 
-### One Shot One Image Rule
+如果一條 prompt 讀起來像 recap、說明書、導演備註，而唔似一張可直接想像的圖片，就應該重寫。
 
-One shot = one image.
+## 參考文件
 
-Do not treat one shot like a mini-sequence.
+遇到以下情況時，可先參考：
 
-Write the image as an already-established state, not as a transition that is still unfolding.
-
-### First-Look Bait Rule
-
-The first readable area of the image should carry the story payload.
-
-If the panel sells proof, the proof should read first or nearly first.
-If the panel sells humiliation, the exposed power relation should read first.
-If the panel sells chemistry, the charged spacing or gaze should read first.
-If the panel sells danger, the threat relation should read first.
-
-Do not bury the real hook behind neutral setup detail.
-
-### Image Space Rule
-
-Write from image space, not story space.
-
-Start from what the lens sees:
-
-- framing
-- subject
-- visible action or pose
-- key prop or proof position
-- minimum readable room cue
-
-Do not start from:
-
-- what the author wants to say
-- what the audience should feel
-- what this beat means in the overall story
-
-### Camera POV Rule
-
-Think in shot perspective.
-
-The prompt should feel like a frozen camera view, not a recap of events.
-
-Prefer wording that helps visualize:
-
-- shot distance
-- where the subject sits in frame
-- what the body is doing
-- what object or proof is visible
-- what part of the room is readable
-
-Prefer plain visual language over technical camera jargon.
-
-### No Flat Prompt Rule
-
-Do not write neutral descriptive prompts for panels whose point is:
-
-- tension
-- shame
-- desire
-- fear
-- revelation
-- reversal
-
-If the panel depends on emotional charge, make that charge visible through:
-
-- distance
-- posture
-- gaze
-- pressure
-- blocking
-- prop contact
-- who controls the center of frame
-
-### Dramatic Compression Rule
-
-Use the fewest details needed to make the panel hit hard.
-
-Keep:
-
-- what sells the panel
-- what keeps it legible
-- what keeps it specific
-
-Cut:
-
-- nice-to-have set dressing
-- stable identity recap already handled by anchors
-- decorative atmosphere that weakens the main read
-
-### Charged Framing Rule
-
-If the beat is intimate or confrontational, use distance, blockage, negative space, overlap, or asymmetry to sharpen it.
-
-### Emotional Body Rule
-
-Express emotion through visible body state, not mood labels.
-
-Prefer:
-
-- fingers paused on the phone edge
-- shoulders locked
-- chin slightly lifted in refusal
-- body half-turned but eyes still fixed on him
-- one step too close for comfort
-
-### Trust Anchors Rule
-
-If `anchor_mapping` already provides stable character, scene, or prop anchors, trust them.
-
-Do not re-describe stable looks unless the feature is necessary to make this specific frame readable.
-
-Do not re-describe stable scene setup or stable item identity unless the frame cannot be understood without it.
-
-### Anchor-Backed Omission Rule
-
-If a scene, character, or item is already supported by `anchor_mapping`, and this frame does not depend on its detailed appearance, omit that detail.
-
-Anchor existence is a reason to shorten the prompt.
-
-### Exact Object Name Rule
-
-If the prompt needs to name an anchored person, place, or item, prefer the exact `object_name` already declared in `anchor_mapping`.
-
-### Shot Task Priority Rule
-
-Use `shot_task` and optional `audience_read` only to decide what should dominate the image.
-
-Do not restate them mechanically.
-
-### Shot Description Base Rule
-
-`shot_description` is the main base of the prompt.
-
-Translate it into clearer image language when needed, but do not replace it with a different panel idea.
-
-### Frame First Rule
-
-Build the prompt in this priority order:
-
-1. framing or camera distance
-2. main subject
-3. visible action, pose, or proof
-4. key prop state if needed
-5. minimum room cue
-6. visible light or atmosphere only if it changes the image
-
-### Visible Only Rule
-
-Only write what can be seen in the image.
-
-Translate abstract emotion into visible image language such as:
-
-- gaze direction
-- hand position
-- body stillness or tension
-- prop position
-- distance from another person
-
-### Established State Rule
-
-Describe what the viewer sees as the frame already exists now.
-
-Prefer:
-
-- the screen shows
-- the phone is on
-- the hand rests on the screen edge
-- the face is turned toward the phone
-
-### Single-Frame Multiplicity Rule
-
-If a panel needs to communicate several items, repeated instances, or repeated evidence, express that through one visible layout or simultaneous arrangement inside the frame.
-
-### Arrangement Over Process Rule
-
-When the panel meaning depends on multiple elements being present, write how they are visibly arranged in the frame, not how they emerge over time.
-
-### Visible Pattern Rule
-
-If the image meaning depends on recognizing repetition, sameness, or shared source, name the repeated visible cues that make that pattern readable.
-
-### Collection State Rule
-
-When the panel centers on a collection of related items, write the frame as one stable collection state rather than a browsing process.
-
-### Proof Legibility Rule
-
-If the panel depends on evidence, the evidence must be visually legible in the prompt, not buried.
-
-Name the exact visible arrangement when helpful:
-
-- several photos tiled on the phone screen
-- the incriminating message thread open in one view
-- a lipstick mark on the white shirt collar near the throat
-
-Avoid story-summary explanation of what the evidence means.
-
-### Reaction Rule
-
-If the panel is reaction-driven, keep the visible link between:
-
-- what the character is seeing or holding
-- how the reaction lands on the body or face
-
-Do not let the image become a generic stunned pose.
-
-Preserve hand, eye, and object continuity.
-
-### Chemistry Rule
-
-If the panel is chemistry-driven, prioritize:
-
-- charged spacing
-- gaze
-- interruption
-- asymmetry
-- near-contact
-- blocked contact
-
-Describe the relation between bodies, not only each person separately.
-
-### Humiliation And Confrontation Rule
-
-If the panel is humiliation-driven or confrontation-driven, make the social power relation readable.
-
-Use:
-
-- crowd placement
-- body angle
-- eye-line imbalance
-- center ownership
-- exposure versus isolation
-
-### Support Character Rule
-
-If a second character is visible, only include the amount of detail needed to keep the frame readable.
-
-Do not let support-character description overpower the intended main center.
-
-### Stable Look Suppression Rule
-
-If a character or room is already stable through anchors, do not spend prompt space reintroducing full appearance.
-
-Only mention a stable element again when this frame needs it for:
-
-- readability
-- role distinction
-- prop recognition
-- proof clarity
-
-### Natural Qwen Prompt Rule
-
-Write natural Traditional Chinese short sentences.
-
-The result should feel like one coherent image request.
-
-Prefer simple visual wording that ordinary readers can picture immediately.
-
-### Caption Rule
-
-Carry the planner-provided `caption` forward into the output.
-
-Default caption format:
-
-- `[Character]: line`
-- `[Character心聲]: line`
-
-If planner input gives:
-
-- `""`
-
-then return:
-
-- `""`
-
-Do not invent a new caption when planner input does not provide one.
-
-## Output Rule
-
-`image_prompt` is the only creative product of this skill.
-
-Return only:
-
-- `shot_id`
-- `image_prompt`
-- `caption`
-
-## Anti-Pattern Warnings
-
-Do not write prompts like this:
-
-- story summary disguised as image prompt
-- "this panel should express ..."
-- "create a feeling of ..."
-- anchor exists but full character appearance is re-described anyway
-- anchor exists but full room setup is re-described anyway
-- anchor exists but item identity is over-explained anyway
-- workflow note disguised as prompt
-- video-style action chain
-- wording built around a state-change that only makes sense over time
-- reaction visible but trigger invisible
-- a proof frame where the evidence is named too vaguely to picture
-- a chemistry frame that reads like neutral posing
-- a charged scene flattened into tasteful but low-tension description
-
-## Prompt Self-Check
-
-Before returning the shot result, check:
-
-- the prompt reads like one still image, not a sequence
-- the prompt describes an established visible state, not an unfolding change
-- the first-look center is clear
-- the prompt's first readable area carries the intended payload
-- the wording starts from what the camera sees
-- the prompt does not retell the story
-- stable anchored looks are not re-described without need
-- stable anchored scene or item setup is not re-described without need
-- proof-heavy prompts keep evidence legible
-- reaction-heavy prompts keep trigger and body state linked
-- chemistry-heavy prompts preserve charged spacing, asymmetry, or blocked contact
-- humiliation and confrontation prompts keep power imbalance visible
-- the caption is short and uses `[Character]: line` format when present
-- if the caption is inner voice, it keeps `[Character心聲]: line` format
+- shot 依賴 proof、chemistry、humiliation、danger、reversal 或強第一眼讀感：`references/shot-value-rules.md`
+- prompt 技術上正確，但畫面平、太 generic、太安全：`references/shot-fail-patterns.md`
+- 需要明確 before/after 例子：`examples/prompt-example.md`
