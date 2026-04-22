@@ -42,7 +42,49 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 
 ## 核心規則
 
-### 1. 只規劃當前 scene 的 shot
+### 1. 先做 scene-level 隱藏預檢
+
+輸出 `shots` array 之前，必須先在內部做一份 scene-level ledger。這份 ledger 不輸出，但必須約束最終 shot 選擇。
+
+如果輸入是 `scene-pack.md`：
+
+- 先找出每個 scene 的 `scene purpose`、`visible action`、`emotional turn`、`key image`、`end hook`、`continuity notes`
+- 特別讀取 downstream handoff 或 image core 類句子，例如「Scene 2 必抓兩個 image core」
+- 把每場必須保留的 image cores 壓成 2 到 4 個最重要畫面，不要把所有情緒句都升級成 shot
+
+如果輸入是 `scene-pack-fpv.md`：
+
+- 先找出每個 scene 真正發生了什麼
+- 抽回可見動作、turning point、場尾 hook
+- 把純內心總結當成節奏參考，但要把每個核心 beat 重新寫成對位的 shot caption
+- 如果一句話沒有可見動作、物件、關係或壓力變化，通常不值得獨立成 shot
+
+預檢時每一格候選 shot 都要先分配一個唯一 `shot_function`。`shot_function` 不需要輸出，但要控制 shot 是否值得存在。常見 function 可以是：
+
+- 入口
+- 發現
+- 確認
+- 交證據
+- 等待反應
+- 求助落空
+- 追問卡住
+- 危險逼近
+- 被困收束
+- 反擊
+- 交易
+- 誤會
+- 揭穿
+
+function 名稱可以按故事類型調整，但同一格只可以有一個主 function。
+
+交付前必須檢查相鄰 shots：
+
+- 如果相鄰兩格的 `audience_read` 實際讀感相同，要刪、合併或重寫其中一格
+- 如果相鄰兩格都是同一種 blocking，例如「雙人中近景、看手機、沉默、互望」，要刪、合併或改成不同視覺策略
+- 如果相鄰兩格的主道具、視線方向、人物距離和壓力來源都一樣，只是換了 wording，默認視為重複
+- 如果兩格只差在「更怕」「更沉默」「再盯住」「手更震」，優先合成一格更強的 shot
+
+### 2. 只規劃當前 scene 的 shot
 
 不要改動故事線。
 
@@ -58,13 +100,6 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 
 只可以揀一個最核心的。
 不要一開始就把兩個以上 beat 塞進同一格，再靠 wording 補救。
-
-如果輸入是 `scene-pack-fpv.md`，先做這一步：
-
-- 找出每個 scene 真正發生了什麼
-- 抽回可見動作、turning point、場尾 hook
-- 把純內心總結當成節奏參考，但要把每個核心 beat 重新寫成對位的 shot caption
-- 如果一句話沒有可見動作、物件、關係或壓力變化，通常不值得獨立成 shot
 
 不要：
 
@@ -84,7 +119,7 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 
 如果發現三欄分別在講不同 beat，就代表這格應重寫或拆 shot。
 
-### 2. 先確保這格 shot 看得明
+### 3. 先確保這格 shot 看得明
 
 每一格 shot 都要讓觀眾一眼知道這格在交代什麼。
 
@@ -150,7 +185,7 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 這種情況會令畫面和旁白像在講兩個不同版本的 beat。
 亦會白白拉長 `shot_description`，逼到 `caption` 為了對位而變長。
 
-### 3. 這格 shot 要值得存在
+### 4. 這格 shot 要值得存在
 
 不要保留內容太相似、讀感太相似、或只是重覆上一格已經成立意思的 shot。
 
@@ -168,8 +203,44 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 - 權力關係變了
 - 危險更近
 - 結尾勾子更強
+- 角色做出新的選擇，而不只是觀眾多看一層反應
 
 如果兩個相鄰 beats 可以壓成一格更清楚、更有力的 shot，就不要硬拆。
+
+特別小心「reaction-only shot」被誤保留。
+如果一格 shot 只是證明角色「看懂了 / 嚇到了 / 手震了 / 臉白了」，而下一格才出現真正戲劇選擇，例如「先看門」「叫她不要講」「把證據壓低」「避開正面回應」，通常應合併。
+
+判斷方式：
+
+- reaction 只回答「她是否知道」；decision 才回答「她知道後站在哪邊」
+- reaction 只升高情緒；decision 改變人物關係、權力方向或故事走向
+- reaction 如果沒有引出新行動、prop 狀態、危險距離或關係變化，不應獨立成 shot
+- 如果 caption 只能寫成「我望住佢越睇越白 / 佢手開始震」，但下一格 caption 才能寫出「點知佢第一反應係望門口 / 叫我唔好講」，前一格多半應被吸收到後一格
+
+更強的寫法通常是把 reaction 當成 decision shot 的前半段：
+
+- 不拆成「母親手震」+「母親望門叫細聲」
+- 改成「母親睇到手震，但第一眼望嘅唔係女兒，係房門」
+
+這種合併不是塞兩個 beat，而是把 reaction 變成 decision 的證據，令同一格清楚回答：她看懂了，而且她第一選擇是壓住。
+
+同樣要小心「first-proof + confirmation」被過度拆開。
+如果一格只是「第一眼看到怪相 / proof」，下一格只是「打開相簿再確認不是一張」，但兩格都圍繞同一部手機、同一個角色低頭看、同一層危險資訊，通常應合併。
+
+判斷方式：
+
+- first proof 只回答「有異常」；confirmation 必須回答「異常升級到哪一層新資訊」
+- 如果 confirmation 只把「一張怪相」變成「不止一張怪相」，但沒有新目標、新權力關係、新危險距離或新行動，通常不值得獨立成 shot
+- 如果 caption 只能寫成「我見到一張唔應該存在嘅相」和「我再滑落去，先知唔止一張」，兩格多半應合成一格更有力的 proof discovery
+- 如果第一 proof 的反應和下一格的打開相簿是同一條連續手部動作，沒有新的空間壓力或被發現風險，就不要硬拆
+
+first-proof 和 confirmation 可以拆開的情況：
+
+- 第一格是被動撞見，第二格是角色主動冒險查證，而且這個「冒險」本身可見，例如確認危險來源背影離開、把手機收近身前、快速點開相簿
+- 第二格揭示新的重要層級，例如 proof 明確指向主角本人、指向母親、指向長期監控、或改變她下一步行動
+- 第二格的 first-eye center 明顯不同，例如第一格是充電線停在插口前和單張怪相，第二格是相簿縮圖群組和她抬頭找母親
+
+拆開時，不要讓兩格都只是「手機亮屏 + 低頭看 + 害怕」。第二格必須把新資訊或新行動放到第一眼中心。
 
 當兩格 shot 都合理時，優先保留更有戲的一格：
 
@@ -188,7 +259,46 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 - 羞辱力度
 - 結尾勾子強度
 
-### 4. `shot_description`、`caption`、`audience_read` 與 `motion_note` 要分工清楚
+### 5. 場景壓縮與視覺語法變化
+
+短劇 shot planning 預設要瘦，不要為了 coverage 把每個微反應都拆成 shot。
+
+如果 `scene-pack.md` 明確指出一場只有 2 個 image cores，該場默認規劃 3 到 5 格 shot。超過 5 格必須同時滿足：
+
+- 每格都有新的可見動作
+- 每格的 `shot_function` 不重複
+- 每格的第一眼中心不重複
+- 額外 shot 令證據、權力關係、危險距離或場尾 hook 變得更清楚
+
+以下類型不應單獨多拆一格，除非 prop 狀態或權力關係真的變了：
+
+- 又一格僵住
+- 又一格望住對方
+- 又一格望住房門
+- 又一格手震
+- 又一格沉默
+- 又一格房間壓住兩個人
+
+相鄰 shots 不能全部用同一種視覺語法。每一格相對前一格，至少要改變以下其中一項：
+
+- 畫面主體：角色、道具、門、照片、手、臉、空間阻隔
+- 第一眼中心：證據、反應、視線、房門、黑屏手機、被打斷的手勢
+- 鏡頭距離：特寫、中近景、中景、主觀視角、物件前景
+- prop 狀態：手機亮屏、相簿縮圖、手機被遞出、手機被攥住、手機黑屏
+- 空間壓力：門縫、床邊、牆角、兩人距離、出口方向
+- action source：誰主動、誰退開、誰握住證據、誰控制沉默
+
+遇到 Scene 2 這類「求助失敗 + 門外危險逼近」材料，優先用以下遞進，而不是連續雙人 reaction：
+
+- proof/object reaction：證據擊中母親，手機或手是第一眼中心
+- betrayal/reaction：母親先看門，再壓低聲音壓住女兒
+- daughter POV / blocked gesture：女兒求助落空，手勢、距離或臉部成為中心
+- door/object pressure：門、門縫、門把或聲音方向成為壓力中心
+- final key image：黑屏手機、被攥緊的證據、或本場最強 hook 收束
+
+這個遞進不是固定模板；如果故事不是 proof / 家庭壓力類，也要用同一原則：每格的 function、first-eye center、blocking 都要推進，不可只換角度重複同一件事。
+
+### 6. `shot_description`、`caption`、`audience_read` 與 `motion_note` 要分工清楚
 
 - `shot_description`：寫這格 shot 主要呈現什麼，只用第三方、可視角度描述
 - `caption`：這格 shot 的對位旁白句，用主角獨白去跟畫面一齊講故事
@@ -329,7 +439,7 @@ description: 根據 `scene-pack.md` 或 `scene-pack-fpv.md` 規劃極精簡的 s
 - `母女關係在此正式破裂`
 - 太長的完整段落旁白
 
-### 5. 輸出語氣要像創作規劃
+### 7. 輸出語氣要像創作規劃
 
 planner 可以在內部做結構思考，但輸出不要寫成 metadata、tagging 或分析備註。
 
@@ -350,6 +460,9 @@ planner 可以在內部做結構思考，但輸出不要寫成 metadata、taggin
 - `caption` 是否跳過了畫面中正在等待、確認、觀察的動作
 - `shot_description` 是否偷偷塞了第二個 beat，令 `caption` 無法完整承接
 - `audience_read` 是否只是在重覆 `caption`
+- 每格是否有唯一 `shot_function`
+- 相鄰 shots 是否重複同一種 blocking、同一個主道具狀態、同一個第一眼中心
+- 如果 scene 只有 2 個 image cores，是否控制在 3 到 5 格；若超過，是否每格都有新可見動作和新戲劇功能
 - 如果兩者有錯位，是否已刪掉多餘畫面資訊，或補回對位 caption
 
 ## Shot 類型參考
@@ -363,12 +476,16 @@ planner 可以在內部做結構思考，但輸出不要寫成 metadata、taggin
 - 如果 proof 太小、太抽象、或埋得太深，就要重寫 shot 呈現方式
 - 避免泛泛的「有人在看手機」而看不出證據本身
 - 不要連續放兩格只揭示同一層級資訊的 proof shot
+- first-proof + confirmation 只有在第二格揭示新層級或新行動風險時才拆開；否則把「撞見怪相」和「再滑確認」合併成一格更強的 proof discovery
+- 如果連續兩格都是同一角色低頭看同一部手機，第二格必須改變第一眼中心，例如從單張怪相改成相簿縮圖群、從手停住改成抬頭找人，或者從 proof 轉成下一步行動
 
 ### Reaction 類 shot
 
 - `shot_description` 要讓讀者知道到底是什麼擊中了角色
 - reaction 最好和觸發物同時保持可見關係
 - 如果下一格會延續去查看同一個 object 或 proof，這格 reaction 要先交代角色為何無法抽離
+- 如果下一格是角色的明確選擇或關係翻轉，reaction 不應只作獨立停頓；優先把反應寫成該選擇的前置可見證據
+- reaction-only shot 只有在「反應本身就是場內轉折」時才保留，例如反應令對方察覺、令角色暴露、令動作被迫中斷、或令 proof 變得更可讀
 - 不要只寫 generic shocked pose
 
 ### Chemistry / confrontation 類 shot
